@@ -1,225 +1,121 @@
 /**
- * @tf/ui 设计令牌与基础组件样式
- * 应用入口 import '@tf/ui/styles.css' 引入一次即可。
- * 原型可在自己的 styles.css 中覆盖 --tf-* 变量实现换肤。
+ * @tf/ui —— 共享组件库（shadcn/ui 架构）
+ *
+ * 组件由 shadcn CLI 生成（Radix 无头组件 + Tailwind v4 + cva），
+ * 存放在 src/components/ui/，通过根 index.ts 统一导出。
+ *
+ * 本文件是 Tailwind 设计令牌（唯一数据源）：
+ *   - 应用入口的 styles.css 需 `@import "tailwindcss"` 之后再 `@import "@tf/ui/styles.css"`
+ *   - 品牌主色延续旧版 --tf-primary 的蓝（#3b6ef6）
+ *   - 换肤：覆盖 :root 中的 --primary / --radius 等变量即可
  */
 
-:root {
-  --tf-bg: #f4f6f9;
-  --tf-surface: #ffffff;
-  --tf-text: #17223b;
-  --tf-text-2: #5a677f;
-  --tf-border: #e2e8f2;
-  --tf-primary: #3b6ef6;
-  --tf-primary-strong: #2f5bd9;
-  --tf-success: #17a06a;
-  --tf-warning: #e8960f;
-  --tf-danger: #e14b4b;
-  --tf-radius: 10px;
-  --tf-shadow: 0 1px 2px rgba(23, 34, 59, 0.06), 0 4px 12px rgba(23, 34, 59, 0.06);
-  --tf-font: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/**
+ * 基础层：把默认边框/描边色指向设计令牌。
+ * Tailwind v4 起 `border` / `divide` / `outline` 的默认色改为 currentColor，
+ * 若不在此兜底，组件里未显式指定颜色的 `border` 会跟随文字色（深色 → 视觉上的“大黑边”）。
+ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@theme inline {
+  --default-font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-* {
-  box-sizing: border-box;
+:root {
+  --radius: 0.375rem;
+  --background: oklch(0.985 0.002 260);
+  --foreground: oklch(0.28 0.035 264);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.28 0.035 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.28 0.035 264);
+  /* 品牌蓝，延续旧版 --tf-primary #3b6ef6 */
+  --primary: oklch(0.58 0.19 264);
+  --primary-foreground: oklch(0.985 0.01 264);
+  --secondary: oklch(0.955 0.005 260);
+  --secondary-foreground: oklch(0.42 0.03 264);
+  --muted: oklch(0.955 0.005 260);
+  --muted-foreground: oklch(0.55 0.02 264);
+  --accent: oklch(0.955 0.005 260);
+  --accent-foreground: oklch(0.42 0.03 264);
+  --destructive: oklch(0.6 0.2 20);
+  --destructive-foreground: oklch(0.985 0.01 20);
+  --border: oklch(0.915 0.006 260);
+  --input: oklch(0.915 0.006 260);
+  --ring: oklch(0.58 0.19 264);
+  /* 图表五色：蓝 / 紫 / 绿 / 橙 / 红（对齐旧版语义色） */
+  --chart-1: oklch(0.58 0.19 264);
+  --chart-2: oklch(0.56 0.18 300);
+  --chart-3: oklch(0.62 0.15 160);
+  --chart-4: oklch(0.72 0.16 65);
+  --chart-5: oklch(0.6 0.2 20);
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: var(--tf-font);
-  background: var(--tf-bg);
-  color: var(--tf-text);
-  -webkit-font-smoothing: antialiased;
-}
-
-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.92em;
-  background: #eef1f6;
-  color: #33415e;
-  padding: 2px 5px;
-  border-radius: 4px;
-}
-
-/* ---------- Button ---------- */
-
-.tf-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font-family: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.tf-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.tf-btn--md {
-  height: 36px;
-  padding: 0 16px;
-  font-size: 14px;
-}
-.tf-btn--sm {
-  height: 28px;
-  padding: 0 10px;
-  font-size: 12.5px;
-}
-.tf-btn--primary {
-  background: var(--tf-primary);
-  color: #fff;
-}
-.tf-btn--primary:hover:not(:disabled) {
-  background: var(--tf-primary-strong);
-}
-.tf-btn--default {
-  background: var(--tf-surface);
-  border-color: var(--tf-border);
-  color: var(--tf-text);
-}
-.tf-btn--default:hover:not(:disabled) {
-  border-color: var(--tf-primary);
-  color: var(--tf-primary);
-}
-.tf-btn--danger {
-  background: transparent;
-  color: var(--tf-danger);
-}
-.tf-btn--danger:hover:not(:disabled) {
-  background: #fdeaea;
-}
-.tf-btn--ghost {
-  background: transparent;
-  color: var(--tf-text-2);
-}
-.tf-btn--ghost:hover:not(:disabled) {
-  background: rgba(23, 34, 59, 0.06);
-  color: var(--tf-text);
-}
-
-/* ---------- Card ---------- */
-
-.tf-card {
-  background: var(--tf-surface);
-  border: 1px solid var(--tf-border);
-  border-radius: var(--tf-radius);
-  box-shadow: var(--tf-shadow);
-}
-.tf-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--tf-border);
-}
-.tf-card__title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-}
-.tf-card__subtitle {
-  margin: 3px 0 0;
-  font-size: 12.5px;
-  color: var(--tf-text-2);
-}
-.tf-card__extra {
-  flex-shrink: 0;
-}
-.tf-card__body {
-  padding: 16px;
-}
-
-/* ---------- Tag ---------- */
-
-.tf-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  line-height: 20px;
-  background: #eef1f6;
-  color: var(--tf-text-2);
-  white-space: nowrap;
-}
-.tf-tag--gray {
-  background: #eef1f6;
-  color: #5a677f;
-}
-.tf-tag--blue {
-  background: #e8effe;
-  color: #2f5bd9;
-}
-.tf-tag--green {
-  background: #e2f6ec;
-  color: #12855a;
-}
-.tf-tag--orange {
-  background: #fdf1dc;
-  color: #b26a05;
-}
-.tf-tag--red {
-  background: #fdeaea;
-  color: #c23a3a;
-}
-.tf-tag--purple {
-  background: #f0e9fd;
-  color: #7a4dd6;
-}
-
-/* ---------- Input ---------- */
-
-.tf-input {
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--tf-border);
-  border-radius: 8px;
-  background: var(--tf-surface);
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--tf-text);
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.tf-input:focus {
-  border-color: var(--tf-primary);
-  box-shadow: 0 0 0 3px rgba(59, 110, 246, 0.15);
-}
-.tf-input::placeholder {
-  color: #9aa6ba;
-}
-
-/* ---------- Empty ---------- */
-
-.tf-empty {
-  padding: 36px 16px;
-  text-align: center;
-}
-.tf-empty__icon {
-  font-size: 26px;
-  color: #b8c2d2;
-  margin-bottom: 6px;
-}
-.tf-empty__title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--tf-text);
-}
-.tf-empty__description {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  color: var(--tf-text-2);
+.dark {
+  --background: oklch(0.2 0.025 264);
+  --foreground: oklch(0.93 0.01 260);
+  --card: oklch(0.25 0.025 264);
+  --card-foreground: oklch(0.93 0.01 260);
+  --popover: oklch(0.25 0.025 264);
+  --popover-foreground: oklch(0.93 0.01 260);
+  --primary: oklch(0.68 0.17 264);
+  --primary-foreground: oklch(0.16 0.02 264);
+  --secondary: oklch(0.3 0.02 264);
+  --secondary-foreground: oklch(0.93 0.01 260);
+  --muted: oklch(0.3 0.02 264);
+  --muted-foreground: oklch(0.68 0.015 260);
+  --accent: oklch(0.3 0.02 264);
+  --accent-foreground: oklch(0.93 0.01 260);
+  --destructive: oklch(0.65 0.2 20);
+  --destructive-foreground: oklch(0.16 0.02 20);
+  --border: oklch(0.34 0.02 264);
+  --input: oklch(0.34 0.02 264);
+  --ring: oklch(0.68 0.17 264);
+  --chart-1: oklch(0.68 0.17 264);
+  --chart-2: oklch(0.62 0.17 300);
+  --chart-3: oklch(0.68 0.14 160);
+  --chart-4: oklch(0.76 0.15 65);
+  --chart-5: oklch(0.65 0.19 20);
 }

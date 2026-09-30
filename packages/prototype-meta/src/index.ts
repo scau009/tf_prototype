@@ -24,6 +24,14 @@ export interface PrototypeMeta {
 }
 
 export const prototypes: PrototypeMeta[] = [
+  {
+    id: 'ship-console',
+    name: '船务信息中台',
+    description: '特福国际内部中台：点对点船期运价查询、船务可视化、费用管理（发票/港口收费标准）、监控节点规则配置。',
+    port: 5103,
+    status: 'wip',
+    updated: '2026-09-30',
+  },
   // @prototypes:append-here
   {
     id: 'todo-list',

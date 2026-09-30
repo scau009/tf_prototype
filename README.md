@@ -13,8 +13,9 @@ push `prod` 分支自动构建部署到 Cloudflare。
 ## 核心特性
 
 - **原型即目录**：`apps/` 下每个子目录是独立可运行的 React 应用，互不依赖、互不阻塞
-- **一键新原型**：`pnpm new <name>` 自动生成脚手架、分配端口、注册到门户
+- **一键新原型**：`pnpm new <name>` 自动生成脚手架（TanStack Router + Query + Tailwind）、分配端口、注册到门户
 - **导航门户**：Hub 以项目卡片为单位汇总全部原型，卡片含状态、启动命令与直达链接
+- **统一技术底座**：TanStack Router（路由）+ TanStack Query（数据层）+ Tailwind v4（样式）+ shadcn/ui（`@tf/ui` 现成组件，不手写基础组件）
 - **共享层沉淀**：`@tf/ui` 组件库 + `@tf/utils` 工具库 + `@tf/prototype-meta` 注册表，避免复制粘贴
 - **一条发布链**：`pnpm build:site` 合并整站（门户→根，原型→子路径）→ `wrangler deploy` 上线
 - **CI/CD**：PR / main 走质量检查，prod 合并自动部署，typecheck 作为发布闸门
@@ -26,15 +27,16 @@ tf_prototype/
 ├── apps/                              # 【原型应用】每个子目录 = 一个独立可运行的原型
 │   ├── hub/                           #   原型导航门户（dev 端口 5173）
 │   ├── todo-list/                     #   示例原型：待办清单（dev 端口 5101）
-│   └── dashboard/                     #   示例原型：数据看板（dev 端口 5102）
+│   ├── dashboard/                     #   示例原型：数据看板（dev 端口 5102）
+│   └── ship-console/                  #   船务信息中台（dev 端口 5103，左栏中台外壳 + 四模块）
 ├── packages/                          # 【共享包】跨原型复用，只被 apps 依赖
 │   ├── prototype-meta/                #   原型注册表（唯一数据源）：id / 端口 / 状态
-│   ├── ui/                            #   共享组件：Button / Card / Tag / Input / Empty + 设计令牌
+│   ├── ui/                            #   共享组件：shadcn/ui（Radix + Tailwind v4）+ 设计令牌
 │   └── utils/                         #   工具与 Hooks：cn / uid / formatDate / useLocalStorage
 ├── scripts/
 │   ├── new-prototype.mjs              # pnpm new：生成新原型 + 分配端口 + 自动注册门户
 │   ├── build-site.mjs                 # pnpm build:site：整站构建合并（hub→根，原型→/<id>/）
-│   └── template-app/                  # 新原型文件模板（{{id}} / {{port}} 占位）
+│   └── template-app/                  # 新原型文件模板（TanStack + Tailwind，{{id}} / {{port}} 占位）
 ├── .github/workflows/
 │   ├── ci.yml                         # CI：PR / push main → typecheck + build
 │   └── deploy.yml                     # CD：push prod → 构建整站 → 部署 Cloudflare Workers
@@ -51,13 +53,16 @@ tf_prototype/
 ```text
 apps/todo-list/
 ├── index.html                 # 应用入口 HTML
-├── vite.config.ts             # Vite 配置（dev 端口写死在此，避免并行漂移）
+├── vite.config.ts             # Vite 配置（Tailwind 插件 + dev 端口写死在此）
 ├── tsconfig.json              # 继承根 tsconfig.base.json
 ├── package.json               # 包名 @tf/todo-list
 └── src/
-    ├── main.tsx               # 应用引导（引入 @tf/ui 样式 + 私有样式）
-    ├── App.tsx                # 页面入口
-    └── styles.css             # 页面私有样式
+    ├── main.tsx               # 应用引导（QueryClient + RouterProvider）
+    ├── router.tsx             # TanStack Router 实例（basepath 自适应 dev / 子路径部署）
+    ├── routes/
+    │   ├── __root.tsx         # 应用外壳（背景/字体/全局浮层）
+    │   └── index.tsx          # 首页（新页面 = 新 Route，挂到 router.tsx）
+    └── styles.css             # Tailwind 入口（引 @tf/ui 令牌 + @source 扫共享组件）
 ```
 
 ### 依赖分层规则
@@ -81,7 +86,7 @@ pnpm dev            # 并行启动 Hub 门户 + 全部原型
 ```
 
 访问 **http://localhost:5173**（门户），点卡片「打开原型 ↗」直达各原型（5101、5102 …）。
-只启动单个原型：`pnpm dev --filter @tf/todo-list`。
+只启动单个原型：`pnpm --filter @tf/todo-list dev`。
 
 ## 日常工作流
 
@@ -95,10 +100,10 @@ pnpm new order-flow 订单流程演示
 （5101–5199）、在原型注册表写入一条 `draft` 记录。随后：
 
 ```bash
-pnpm dev --filter @tf/order-flow   # 启动并访问 http://localhost:<分配的端口>
+pnpm --filter @tf/order-flow dev   # 启动并访问 http://localhost:<分配的端口>
 ```
 
-在 `src/App.tsx` 搭建交互；成型后更新注册表的 `description` / `status`
+在 `src/routes/` 搭建交互（新页面挂到 `src/router.tsx`）；成型后更新注册表的 `description` / `status`
 （`draft → wip → demo → done`），门户卡片即时同步。
 
 ### 发布上线
@@ -116,7 +121,7 @@ git checkout prod && git merge main && git push   # 推送后 GitHub Actions 自
 | 命令 | 说明 |
 | --- | --- |
 | `pnpm dev` | 并行启动门户与全部原型（hub 5173，原型 5101+） |
-| `pnpm dev --filter @tf/<id>` | 只启动某个原型 |
+| `pnpm --filter @tf/<id> dev` | 只启动某个原型 |
 | `pnpm new <name> [标题]` | 创建新原型：脚手架 + 分配端口 + 注册门户 |
 | `pnpm typecheck` | 全仓 TypeScript 类型检查 |
 | `pnpm build` | 构建全部应用（产物在各自 `dist/`） |
@@ -163,14 +168,18 @@ pnpm build:site                          wrangler deploy
 
 - **命名**：原型目录与 id 用 kebab-case（如 `order-flow`），包名 `@tf/<id>`，两者一致
 - **端口**：Hub 固定 5173；原型 5101–5199，由 `pnpm new` 顺序分配
-- **样式**：设计令牌统一在 `@tf/ui/styles.css`（`--tf-*` 变量），页面私有样式各自维护
-- **沉没规则**：组件被第 2 个原型用到时才提升到 `@tf/ui`；mock 数据留在原型内
+- **样式**：Tailwind v4 工具类；设计令牌（`@theme` + `:root` 变量）统一在 `@tf/ui/styles.css`，页面入口引一次
+- **组件**：基础组件一律用 `@tf/ui`（shadcn/ui 生成），不手写；缺的组件在 `packages/ui` 跑 shadcn CLI 补
+- **数据**：mock 数据写在原型内，经 TanStack Query（useQuery）消费；列表用 TanStack Table
+- **沉没规则**：新组件先问 shadcn registry 有没有；只有业务组件才写在原型 `src/components/`
 - **状态流转**：`draft`（刚创建）→ `wip`（搭建中）→ `demo`（可演示）→ `done`（结论已沉淀）
 - **凭据**：Cloudflare 令牌只存在于环境变量 / GitHub Secrets，禁止写入代码与配置
 
 ## 技术栈版本
 
 - Node ≥ 20 · pnpm 12（workspace 协议，版本由 `packageManager` 锁定）
-- React 19 · TypeScript 5.9 · Vite 7（@vitejs/plugin-react）
+- React 19 · TypeScript 5.9 · Vite 7（@vitejs/plugin-react + @tailwindcss/vite）
+- TanStack Router（代码式路由，basepath 自适应子路径部署）· TanStack Query · TanStack Table（按需）
+- Tailwind CSS v4 · shadcn/ui（Radix + cva + lucide-react）· Recharts（dashboard 图表）
 - wrangler 4（Workers 静态资源托管）
-- 无 UI 框架、无图表库 —— 共享组件与图表均为手写轻实现，保证原型轻量可控
+- 原则：基础组件交给 shadcn/ui，业务组件写在原型内，保持原型轻量可控

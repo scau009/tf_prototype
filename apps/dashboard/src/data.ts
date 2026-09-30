@@ -1,5 +1,10 @@
 export type RangeKey = '7d' | '14d' | '30d'
 
+/** search params 守卫：非法值回落 7d */
+export function isRangeKey(v: unknown): v is RangeKey {
+  return v === '7d' || v === '14d' || v === '30d'
+}
+
 export interface ChannelStat {
   channel: string
   value: number
@@ -95,4 +100,13 @@ export function getMetrics(range: RangeKey): Metrics {
       value: Math.round(visits * share),
     })),
   }
+}
+
+/**
+ * 模拟异步数据源：为 TanStack Query 提供 queryFn（带 350ms 延迟，
+ * 用于演示 loading 骨架屏与切换 range 时的重新请求）。
+ */
+export async function getMetricsAsync(range: RangeKey): Promise<Metrics> {
+  await new Promise((resolve) => setTimeout(resolve, 350))
+  return getMetrics(range)
 }

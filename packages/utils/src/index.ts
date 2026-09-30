@@ -1,6 +1,12 @@
-/** 拼接 className，自动跳过假值（配合组件库的 class 组合使用） */
-export function cn(...parts: Array<string | number | false | null | undefined>): string {
-  return parts.filter(Boolean).join(' ')
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+/**
+ * 拼接 className 并合并 Tailwind 冲突类（shadcn/ui 生态标准实现）。
+ * 兼容 clsx 的全部入参形态（字符串 / 数组 / 对象 / 假值）。
+ */
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs))
 }
 
 /** 生成简单唯一 id（原型场景够用，非生产级） */

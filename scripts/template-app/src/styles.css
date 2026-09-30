@@ -1,11 +1,5 @@
-.page {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 48px 24px;
-}
+@import "tailwindcss";
+@import "@tf/ui/styles.css";
 
-.starter__hint {
-  margin: 0;
-  line-height: 1.9;
-  font-size: 14px;
-}
+/* 共享组件库（workspace 包）不在自动扫描范围内，显式声明 */
+@source "../node_modules/@tf/ui/src";

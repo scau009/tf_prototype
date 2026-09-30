@@ -105,6 +105,6 @@ console.log(`✔ 已创建 apps/${name}（包名 @tf/${name}，dev 端口 ${port
 console.log('✔ 已注册到 packages/prototype-meta/src/index.ts（状态 draft）')
 console.log('')
 console.log('下一步：')
-console.log(`  1. 启动：pnpm dev --filter @tf/${name}`)
+console.log(`  1. 启动：pnpm --filter @tf/${name} dev`)
 console.log(`  2. 访问：http://localhost:${port}`)
 console.log('  3. 完善 packages/prototype-meta 中的描述，Hub 卡片会同步展示')

@@ -1,3 +1,4 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@tf/ui'
 import { cn } from '@tf/utils'
 
 export interface StatCardProps {
@@ -13,13 +14,17 @@ export function StatCard({ label, value, delta, invert = false }: StatCardProps)
   const up = delta >= 0
   const good = invert ? !up : up
   return (
-    <div className="stat">
-      <p className="stat__label">{label}</p>
-      <p className="stat__value">{value}</p>
-      <p className={cn('stat__delta', good ? 'stat__delta--up' : 'stat__delta--down')}>
-        {up ? '▲' : '▼'} {Math.abs(delta)}%
-        <span> 较上一周期</span>
-      </p>
-    </div>
+    <Card className="gap-2.5 py-4">
+      <CardHeader className="px-4">
+        <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
+      </CardHeader>
+      <CardContent className="px-4">
+        <p className="text-2xl font-bold tracking-tight">{value}</p>
+        <p className={cn('mt-1.5 text-xs font-semibold', good ? 'text-emerald-600' : 'text-red-600')}>
+          {up ? '▲' : '▼'} {Math.abs(delta)}%
+          <span className="ml-1 font-normal text-muted-foreground">较上一周期</span>
+        </p>
+      </CardContent>
+    </Card>
   )
 }
