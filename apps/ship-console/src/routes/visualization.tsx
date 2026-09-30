@@ -1,145 +1,374 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Skeleton,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@tf/ui'
 import {
-  ChartColumnIcon,
-  ChartPieIcon,
-  ClockIcon,
-  GlobeIcon,
-  RouteIcon,
-  ShipIcon,
+  ArrowRightIcon,
+  InboxIcon,
+  RotateCcwIcon,
+  SearchIcon,
   TriangleAlertIcon,
 } from 'lucide-react'
-import { getOverview } from '../data'
-import { ChartPlaceholder } from '../components/ChartPlaceholder'
-import { MetricCard } from '../components/MetricCard'
+import {
+  CARRIER_OPTIONS,
+  getShipments,
+  NODE_DEFS,
+  NODE_LABEL,
+  TRACKING_SOURCE_LABEL,
+  type ShipmentStatus,
+  type TrackingSearch,
+} from '../data'
+import { CarrierLogo } from '../components/CarrierLogo'
 import { PageHeader } from '../components/PageHeader'
+import { ShipmentStatusBadge } from '../components/ShipmentStatusBadge'
+import { TableSkeleton } from '../components/TableSkeleton'
+import { TrackingCreateDialog } from '../components/TrackingCreateDialog'
 
-/** 船务可视化：运行总览指标 + 规划中的图表区 */
+const SHIPMENT_STATUSES: ShipmentStatus[] = ['进行中', '异常', '已完成', '已取消']
+
+/** 受控筛选下拉（值 'all' = 不限） */
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  options: Array<{ value: string; label: string }>
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">全部</SelectItem>
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
+/** 在途追踪列表页：新建记录 + 筛选 + 结果表 */
 export function VisualizationPage() {
-  const { data: stats, isPending } = useQuery({
-    queryKey: ['overview'],
-    queryFn: getOverview,
-  })
+  const search = useSearch({ from: '/_layout/visualization' })
+  const navigate = useNavigate({ from: '/visualization' })
+  const { data, isPending } = useQuery({ queryKey: ['shipments'], queryFn: getShipments })
+
+  const all = useMemo(() => data ?? [], [data])
+
+  // 筛选项的可选值取自当前数据，保证与实际内容一致
+  const origins = useMemo(() => [...new Set(all.map((s) => s.origin))], [all])
+  const destinations = useMemo(() => [...new Set(all.map((s) => s.destination))], [all])
+
+  const filtered = useMemo(() => {
+    const q = (search.q ?? '').toLowerCase()
+    return all.filter((s) => {
+      if (search.status && s.status !== search.status) return false
+      if (search.node && s.currentNode !== search.node) return false
+      if (search.carrier && s.carrier.code !== search.carrier) return false
+      if (search.origin && s.origin !== search.origin) return false
+      if (search.destination && s.destination !== search.destination) return false
+      if (search.alert && !s.hasAlert) return false
+      if (q) {
+        const hay = [
+          s.sourceNo,
+          s.blNo,
+          s.bookingNo,
+          s.vessel,
+          s.voyage,
+          s.carrier.code,
+          s.carrier.name,
+          ...s.containerNos,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+        if (!hay.includes(q)) return false
+      }
+      return true
+    })
+  }, [all, search])
+
+  const setSearch = (patch: Partial<TrackingSearch>) =>
+    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true })
+
+  const hasFilter =
+    Boolean(search.q || search.status || search.node || search.carrier || search.origin || search.destination || search.alert)
 
   return (
     <>
       <PageHeader
-        title="船务可视化"
-        desc="船务运行总览：船舶、航次、准班率与异常节点一屏掌握"
-      />
+        title="在途追踪"
+        desc="以一票货为中心，追踪 订舱 → 空箱返还 共 11 个节点的完整生命周期"
+      >
+        <TrackingCreateDialog />
+      </PageHeader>
 
-      {/* 运行指标 */}
-      {isPending || !stats ? (
-        <section className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Card key={i} className="gap-2 py-4">
-              <CardHeader>
-                <Skeleton className="h-3 w-16" />
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Skeleton className="h-7 w-24" />
-                <Skeleton className="h-3 w-28" />
-              </CardContent>
-            </Card>
-          ))}
-        </section>
-      ) : (
-        <section className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
-          <MetricCard
-            label="在航船舶"
-            value={`${stats.vessels} 艘`}
-            icon={ShipIcon}
-            delta={stats.vesselsDelta}
-          />
-          <MetricCard
-            label="执行中航次"
-            value={`${stats.voyages} 个`}
-            icon={RouteIcon}
-            delta={stats.voyagesDelta}
-          />
-          <MetricCard
-            label="准班率"
-            value={`${stats.onTimeRate}%`}
-            icon={ClockIcon}
-            delta={stats.onTimeRateDelta}
-          />
-          <MetricCard
-            label="异常节点"
-            value={`${stats.abnormalNodes} 个`}
-            icon={TriangleAlertIcon}
-            delta={stats.abnormalDelta}
-            invert
-          />
-        </section>
-      )}
-
-      {/* 图表区（占位，规划中） */}
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="gap-4 py-5">
-          <CardHeader>
-            <CardTitle className="text-base">准班率趋势</CardTitle>
-            <CardDescription>按日统计 ETD 准班比例，识别延误高发期</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartPlaceholder
-              title="近 30 天船期准班率趋势"
-              desc="纵轴准班率（%） · 横轴日期 · 支持按航线切换"
-              icon={ChartColumnIcon}
-              chartType="折线图 · Recharts"
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="gap-4 py-5">
-          <CardHeader>
-            <CardTitle className="text-base">目的港分布</CardTitle>
-            <CardDescription>按目的港统计箱量，识别热点港口</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartPlaceholder
-              title="目的港箱量分布 TOP 10"
-              desc="按 20GP / 40HQ 拆分堆叠 · 支持按月份切换"
-              icon={ChartPieIcon}
-              chartType="柱状图 · Recharts"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
+      {/* 筛选条件 */}
       <Card className="gap-4 py-5">
         <CardHeader>
-          <CardTitle className="text-base">航线与船舶位置</CardTitle>
-          <CardDescription>点对点航线的船舶动态与在途状态</CardDescription>
+          <CardTitle className="text-base">筛选条件</CardTitle>
+          <CardDescription>按单号 / 节点 / 船司 / 起讫港组合筛选，条件保存在地址栏，可分享与回退</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ChartPlaceholder
-            title="全球航线视图"
-            desc="航线轨迹 + 船舶实时位置 + 抵港倒计时，点击船舶下钻航次详情"
-            icon={GlobeIcon}
-            chartType="地图 · 待选型"
-          />
+        <CardContent className="space-y-3">
+          <div className="relative">
+            <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search.q ?? ''}
+              autoComplete="off"
+              placeholder="搜索单号 / 提单号 / 箱号 / 船名航次"
+              className="pl-8"
+              onChange={(e) => setSearch({ q: e.target.value || undefined })}
+            />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <FilterSelect
+              label="整票状态"
+              value={search.status ?? 'all'}
+              onChange={(v) => setSearch({ status: v === 'all' ? undefined : (v as ShipmentStatus) })}
+              options={SHIPMENT_STATUSES.map((s) => ({ value: s, label: s }))}
+            />
+            <FilterSelect
+              label="当前节点"
+              value={search.node ?? 'all'}
+              onChange={(v) => setSearch({ node: v === 'all' ? undefined : (v as (typeof NODE_DEFS)[number]['key']) })}
+              options={NODE_DEFS.map((n) => ({ value: n.key, label: n.label }))}
+            />
+            <FilterSelect
+              label="船司"
+              value={search.carrier ?? 'all'}
+              onChange={(v) => setSearch({ carrier: v === 'all' ? undefined : v })}
+              options={CARRIER_OPTIONS.map((c) => ({ value: c, label: c }))}
+            />
+            <FilterSelect
+              label="起运港"
+              value={search.origin ?? 'all'}
+              onChange={(v) => setSearch({ origin: v === 'all' ? undefined : v })}
+              options={origins.map((o) => ({ value: o, label: o }))}
+            />
+            <FilterSelect
+              label="目的港"
+              value={search.destination ?? 'all'}
+              onChange={(v) => setSearch({ destination: v === 'all' ? undefined : v })}
+              options={destinations.map((d) => ({ value: d, label: d }))}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              共 {all.length} 票 · 当前筛选 {filtered.length} 票
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant={search.alert ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSearch({ alert: search.alert ? undefined : true })}
+              >
+                <TriangleAlertIcon /> 仅看异常
+              </Button>
+              <Button variant="ghost" size="sm" disabled={!hasFilter} onClick={() => navigate({ search: {}, replace: true })}>
+                <RotateCcwIcon /> 重置
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      <Card className="gap-4 py-5">
-        <CardHeader>
-          <CardTitle className="text-base">模块规划</CardTitle>
-          <CardDescription>这个模块将怎么做</CardDescription>
+      {/* 结果表 */}
+      <Card className="gap-0 overflow-hidden py-0">
+        <CardHeader className="border-b px-4 py-3">
+          <CardTitle className="text-base">跟踪记录</CardTitle>
+          <CardDescription className="mt-1 text-xs">
+            {isPending ? '加载中…' : `共 ${filtered.length} 票 · 一行一票，点击「查看」进入生命周期详情`}
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ul className="grid gap-2 text-[13px] leading-relaxed text-muted-foreground sm:grid-cols-2">
-            <li>· 指标卡已接 TanStack Query，涨跌语义可反转（异常节点上升显示为红色）</li>
-            <li>· 图表区将接 Recharts，颜色沿用 @tf/ui 的图表令牌（chart-1 ~ chart-5）</li>
-            <li>· 图表与指标联动：点击港口/航线下钻到船期运价查询（?origin=&amp;destination=）</li>
-            <li>· 异常节点明细接到监控节点配置页，形成「发现 → 配规则」闭环</li>
-          </ul>
+
+        <CardContent className="px-0">
+          {isPending ? (
+            <div className="p-4">
+              <TableSkeleton rows={6} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-12 text-center">
+              <InboxIcon className="size-8 text-muted-foreground/60" />
+              <p className="text-sm text-muted-foreground">没有符合条件的跟踪记录</p>
+              {hasFilter ? (
+                <Button variant="ghost" size="xs" onClick={() => navigate({ search: {}, replace: true })}>
+                  清除筛选条件
+                </Button>
+              ) : null}
+            </div>
+          ) : (
+            <Table className="text-xs">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="h-9 pl-4">单号 / 来源</TableHead>
+                  <TableHead className="h-9">船司</TableHead>
+                  <TableHead className="h-9">航线</TableHead>
+                  <TableHead className="h-9">当前节点</TableHead>
+                  <TableHead className="h-9">状态</TableHead>
+                  <TableHead className="h-9">ETD / ETA</TableHead>
+                  <TableHead className="h-9">中转</TableHead>
+                  <TableHead className="h-9">箱型 / 箱量</TableHead>
+                  <TableHead className="h-9">更新</TableHead>
+                  <TableHead className="h-9 pr-4 text-right">操作</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((s) => {
+                  const direct = s.transshipPorts.length === 0
+                  const doneContainers = s.containers.filter((c) => c.status === '已完成').length
+                  const rollCount = s.containers.filter((c) => c.roll).length
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell className="py-2 pl-4">
+                        <div className="font-medium">{s.sourceNo}</div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {TRACKING_SOURCE_LABEL[s.source]}
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <CarrierLogo carrier={s.carrier} className="size-6 rounded-md text-[8px]" />
+                          <span className="font-medium">{s.carrier.code}</span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <span className="font-medium">{s.origin}</span>
+                        <ArrowRightIcon className="mx-1 inline size-3 text-muted-foreground/60" />
+                        <span className="font-medium">{s.destination}</span>
+                        <div className="text-[10px] text-muted-foreground">
+                          {s.vessel} {s.voyage}
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{NODE_LABEL[s.currentNode]}</span>
+                          <span className="text-[10px] text-muted-foreground tabular-nums">
+                            {s.progress}%
+                          </span>
+                        </div>
+                        <div className="mt-1 h-1 w-24 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary"
+                            style={{ width: `${s.progress}%` }}
+                          />
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <ShipmentStatusBadge status={s.status} />
+                          {s.hasAlert && s.status !== '异常' ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <TriangleAlertIcon className="size-3.5 cursor-help text-amber-500" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-[11px]">存在延误节点</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : null}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="tabular-nums text-[11px]">
+                        <div>ETD {s.etd.slice(5)}</div>
+                        <div className="text-muted-foreground">ETA {s.eta.slice(5)}</div>
+                      </TableCell>
+
+                      <TableCell>
+                        {direct ? (
+                          <span className="text-muted-foreground">直航</span>
+                        ) : (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="cursor-help rounded-sm font-medium underline decoration-muted-foreground/40 decoration-dashed underline-offset-2 hover:text-primary"
+                              >
+                                {s.transshipPorts.length} 次中转
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-[11px] text-background/70">中转港（按先后）</p>
+                              <p className="mt-0.5 font-medium">{s.transshipPorts.join(' → ')}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="tabular-nums">
+                        <div>
+                          <span className="font-medium">{s.containerType}</span>
+                          <span className="ml-1 text-muted-foreground">× {s.containerCount}</span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-1">
+                          <span className="text-[10px] text-muted-foreground">
+                            完成 {doneContainers}/{s.containerCount} 箱
+                          </span>
+                          {rollCount > 0 ? (
+                            <span className="rounded-sm border border-amber-200 bg-amber-50 px-1 text-[10px] text-amber-700">
+                              甩柜 {rollCount}
+                            </span>
+                          ) : null}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="text-[11px] text-muted-foreground tabular-nums">
+                        {s.updatedAt.slice(5)}
+                      </TableCell>
+
+                      <TableCell className="pr-4 text-right">
+                        <Button variant="ghost" size="xs" asChild>
+                          <Link to="/visualization/$shipmentId" params={{ shipmentId: s.id }}>
+                            查看
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </>

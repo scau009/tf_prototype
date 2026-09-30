@@ -1,10 +1,18 @@
 import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router'
-import { isFeeTab, isValidScheduleDate, type FeeTab } from './data'
+import {
+  isValidScheduleDate,
+  validateInvoiceSearch,
+  validateMonitoringSearch,
+  validateTariffSearch,
+  validateTrackingSearch,
+} from './data'
 import { RootLayout } from './routes/__root'
 import { AppShell } from './routes/_layout'
 import { SchedulePage } from './routes/schedule'
 import { VisualizationPage } from './routes/visualization'
-import { FeesPage } from './routes/fees'
+import { TrackingDetailPage } from './routes/tracking-detail'
+import { InvoicesPage } from './routes/invoices'
+import { TariffBookPage } from './routes/tariff-book'
 import { MonitoringPage } from './routes/monitoring'
 import { DEFAULT_NAV } from './nav'
 
@@ -41,20 +49,34 @@ const scheduleRoute = createRoute({
 const visualizationRoute = createRoute({
   getParentRoute: () => shellRoute,
   path: '/visualization',
+  /** 列表筛选条件落在 search params：?q=&status=&node=&carrier=&origin=&destination=&alert=1 */
+  validateSearch: validateTrackingSearch,
   component: VisualizationPage,
 })
-const feesRoute = createRoute({
+const trackingDetailRoute = createRoute({
   getParentRoute: () => shellRoute,
-  path: '/fees',
-  /** 费用管理页签落在 search params（?tab=invoice|fee），可分享、可回退 */
-  validateSearch: (search: Record<string, unknown>): { tab?: FeeTab } => ({
-    tab: isFeeTab(search.tab) ? search.tab : 'invoice',
-  }),
-  component: FeesPage,
+  path: '/visualization/$shipmentId',
+  component: TrackingDetailPage,
+})
+const invoicesRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/invoices',
+  /** 列表筛选条件落在 search params：?q=&status=&category=&currency= */
+  validateSearch: validateInvoiceSearch,
+  component: InvoicesPage,
+})
+const tariffBookRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/tariff-book',
+  /** 列表筛选条件落在 search params：?q=&port=&category=&currency= */
+  validateSearch: validateTariffSearch,
+  component: TariffBookPage,
 })
 const monitoringRoute = createRoute({
   getParentRoute: () => shellRoute,
   path: '/monitoring',
+  /** 规则筛选条件落在 search params：?q=&node=&level=&status= */
+  validateSearch: validateMonitoringSearch,
   component: MonitoringPage,
 })
 
@@ -63,7 +85,9 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     scheduleRoute,
     visualizationRoute,
-    feesRoute,
+    trackingDetailRoute,
+    invoicesRoute,
+    tariffBookRoute,
     monitoringRoute,
   ]),
 ])

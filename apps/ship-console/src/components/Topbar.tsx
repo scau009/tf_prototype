@@ -1,7 +1,7 @@
 import { useLocation } from '@tanstack/react-router'
 import { ChevronRightIcon } from 'lucide-react'
 import { Badge } from '@tf/ui'
-import { findNav } from '../nav'
+import { findNav, isSubRouteOf } from '../nav'
 
 /**
  * 中台顶栏：左侧按当前路由渲染面包屑（模块名 + 说明），
@@ -10,6 +10,7 @@ import { findNav } from '../nav'
 export function Topbar() {
   const pathname = useLocation({ select: (l) => l.pathname })
   const current = findNav(pathname)
+  const sub = current.detail && isSubRouteOf(pathname, current) ? current.detail : null
 
   const today = new Date()
   const dateText = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
@@ -21,9 +22,16 @@ export function Topbar() {
         <span className="hidden text-muted-foreground sm:inline">船务信息中台</span>
         <ChevronRightIcon className="hidden size-3.5 shrink-0 text-muted-foreground/60 sm:inline" />
         <span className="truncate font-medium">{current.label}</span>
-        <span className="ml-1 hidden truncate text-xs text-muted-foreground md:inline">
-          · {current.desc}
-        </span>
+        {sub ? (
+          <>
+            <ChevronRightIcon className="size-3.5 shrink-0 text-muted-foreground/60" />
+            <span className="truncate font-medium">{sub}</span>
+          </>
+        ) : (
+          <span className="ml-1 hidden truncate text-xs text-muted-foreground md:inline">
+            · {current.desc}
+          </span>
+        )}
       </nav>
 
       {/* 右侧信息 */}

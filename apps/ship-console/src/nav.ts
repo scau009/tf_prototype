@@ -1,13 +1,19 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   BellRingIcon,
+  BookTextIcon,
   CalendarRangeIcon,
-  ChartColumnIcon,
-  ReceiptIcon,
+  RadarIcon,
+  ReceiptTextIcon,
 } from 'lucide-react'
 
 /** 中台全部路由路径（字面量联合，供 Link 的 to 做类型检查） */
-export type RoutePath = '/schedule' | '/visualization' | '/fees' | '/monitoring'
+export type RoutePath =
+  | '/schedule'
+  | '/visualization'
+  | '/invoices'
+  | '/tariff-book'
+  | '/monitoring'
 
 /**
  * 中台导航配置（唯一数据源）：
@@ -21,6 +27,8 @@ export interface NavItem {
   /** 一句话说明（顶栏副标题） */
   desc: string
   icon: LucideIcon
+  /** 子路由（如详情页）的面包屑文案；无子页面时不设置 */
+  detail?: string
 }
 
 /** 业务功能模块（顺序 = 侧边栏菜单顺序，首项为默认落地模块） */
@@ -33,20 +41,27 @@ export const MODULE_NAV: NavItem[] = [
   },
   {
     path: '/visualization',
-    label: '船务可视化',
-    desc: '船务运行总览：在航船舶、执行中航次、准班率与异常节点',
-    icon: ChartColumnIcon,
+    label: '在途追踪',
+    desc: '以一票货为中心，追踪 订舱 → 空箱返还 共 11 个节点的完整生命周期',
+    icon: RadarIcon,
+    detail: '跟踪详情',
   },
   {
-    path: '/fees',
-    label: '费用管理',
-    desc: '发票上传管理与港口收费标准查询，支撑进出口费用核对',
-    icon: ReceiptIcon,
+    path: '/invoices',
+    label: '发票管理',
+    desc: '发票台账：按提单号关联一票货，支持筛选、预览与下载发票原件',
+    icon: ReceiptTextIcon,
+  },
+  {
+    path: '/tariff-book',
+    label: '港口收费标准',
+    desc: 'Port Tariff Book：各港口费用类别的收费标准查询与维护',
+    icon: BookTextIcon,
   },
   {
     path: '/monitoring',
     label: '监控节点配置',
-    desc: '关键业务节点的规则与告警阈值配置（ETD、到港、结算等）',
+    desc: '单票提单生命周期监控：按在途节点配置预警规则与提前量（不含发票 / 费用）',
     icon: BellRingIcon,
   },
 ]
@@ -69,8 +84,21 @@ export function toRoutePath(pathname: string): string {
   return rel === '' ? '/' : rel
 }
 
-/** 按当前路径查找导航项（未匹配到时回落默认落地模块） */
+/**
+ * 按当前路径查找导航项：先精确匹配，再按最长前缀匹配子路由
+ * （如 `/visualization/TRK-2026-001` 归属 `/visualization`），未匹配到时回落默认落地模块。
+ */
 export function findNav(pathname: string): NavItem {
   const path = toRoutePath(pathname)
-  return ALL_NAV.find((item) => item.path === path) ?? DEFAULT_NAV
+  return (
+    ALL_NAV.find((item) => item.path === path) ??
+    ALL_NAV.find((item) => path.startsWith(`${item.path}/`)) ??
+    DEFAULT_NAV
+  )
+}
+
+/** 当前路径是否落在某导航项的子路由下（用于顶栏追加子级面包屑） */
+export function isSubRouteOf(pathname: string, item: NavItem): boolean {
+  const path = toRoutePath(pathname)
+  return path !== item.path && path.startsWith(`${item.path}/`)
 }
