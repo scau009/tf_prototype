@@ -1,32 +1,7 @@
-import { useMemo, useState } from 'react'
-import { allTags, prototypes } from '@tf/prototype-meta'
-import { Empty, Input } from '@tf/ui'
-import { Chips } from './components/Chips'
+import { prototypes } from '@tf/prototype-meta'
 import { PrototypeCard } from './components/PrototypeCard'
-import { STATUS_META, STATUS_OPTIONS } from './status'
-
-const TAG_OPTIONS = ['全部', ...allTags()]
-const STATUS_FILTERS = ['全部', ...STATUS_OPTIONS]
 
 export default function App() {
-  const [keyword, setKeyword] = useState('')
-  const [tag, setTag] = useState('全部')
-  const [status, setStatus] = useState('全部')
-
-  const filtered = useMemo(() => {
-    const kw = keyword.trim().toLowerCase()
-    return prototypes.filter((p) => {
-      const hitKeyword =
-        !kw ||
-        p.name.toLowerCase().includes(kw) ||
-        p.description.toLowerCase().includes(kw) ||
-        p.id.toLowerCase().includes(kw)
-      const hitTag = tag === '全部' || p.tags.includes(tag)
-      const hitStatus = status === '全部' || STATUS_META[p.status].label === status
-      return hitKeyword && hitTag && hitStatus
-    })
-  }, [keyword, tag, status])
-
   return (
     <div className="hub">
       <header className="hub__header">
@@ -40,31 +15,11 @@ export default function App() {
         <code className="hub__cmd">$ pnpm dev</code>
       </header>
 
-      <div className="hub__toolbar">
-        <Input
-          placeholder="搜索原型名称 / 简介 / id…"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-        <div className="hub__chips">
-          <span className="hub__chip-label">标签</span>
-          <Chips options={TAG_OPTIONS} value={tag} onChange={setTag} />
-        </div>
-        <div className="hub__chips">
-          <span className="hub__chip-label">状态</span>
-          <Chips options={STATUS_FILTERS} value={status} onChange={setStatus} />
-        </div>
+      <div className="hub__grid">
+        {prototypes.map((meta) => (
+          <PrototypeCard key={meta.id} meta={meta} />
+        ))}
       </div>
-
-      {filtered.length > 0 ? (
-        <div className="hub__grid">
-          {filtered.map((meta) => (
-            <PrototypeCard key={meta.id} meta={meta} />
-          ))}
-        </div>
-      ) : (
-        <Empty title="没有匹配的原型" description="换个关键词，或清除标签 / 状态筛选试试" />
-      )}
 
       <footer className="hub__footer">
         {import.meta.env.DEV ? (

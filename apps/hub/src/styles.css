@@ -46,59 +46,6 @@
   font-size: 12.5px;
 }
 
-/* ---------- toolbar ---------- */
-
-.hub__toolbar {
-  background: var(--tf-surface);
-  border: 1px solid var(--tf-border);
-  border-radius: var(--tf-radius);
-  box-shadow: var(--tf-shadow);
-  padding: 14px 16px;
-  display: grid;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.hub__toolbar .tf-input {
-  width: 100%;
-}
-.hub__chips {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.hub__chip-label {
-  font-size: 12.5px;
-  color: var(--tf-text-2);
-  flex-shrink: 0;
-}
-.hub__chips-row {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.hub__chip {
-  height: 26px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid var(--tf-border);
-  background: transparent;
-  color: var(--tf-text-2);
-  font-family: inherit;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.hub__chip:hover {
-  border-color: var(--tf-primary);
-  color: var(--tf-primary);
-}
-.hub__chip--active {
-  background: var(--tf-primary);
-  border-color: var(--tf-primary);
-  color: #fff;
-}
-
 /* ---------- grid ---------- */
 
 .hub__grid {
@@ -143,11 +90,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 42px;
-}
-.proto-card__tags {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
 }
 .proto-card__footer {
   margin-top: auto;

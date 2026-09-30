@@ -17,8 +17,6 @@ export interface PrototypeMeta {
   description: string
   /** dev server 端口，约定 5100–5199，由 pnpm new 自动分配 */
   port: number
-  /** 分类标签，用于门户筛选 */
-  tags: string[]
   /** 状态：draft 草稿 / wip 进行中 / demo 可演示 / done 已完成 */
   status: PrototypeStatus
   /** 最后更新日期 YYYY-MM-DD */
@@ -32,7 +30,6 @@ export const prototypes: PrototypeMeta[] = [
     name: '待办清单',
     description: '最小交互示例：添加、勾选、删除、筛选与 localStorage 持久化。',
     port: 5101,
-    tags: ['示例', '表单交互'],
     status: 'demo',
     updated: '2026-09-30',
   },
@@ -41,20 +38,10 @@ export const prototypes: PrototypeMeta[] = [
     name: '数据看板',
     description: '数据可视化示例：时间范围切换、指标卡与趋势图、渠道分布联动。',
     port: 5102,
-    tags: ['示例', '数据可视化'],
     status: 'demo',
     updated: '2026-09-30',
   },
 ]
-
-/** 全部标签（按出现顺序去重） */
-export function allTags(): string[] {
-  const seen = new Set<string>()
-  for (const p of prototypes) {
-    for (const t of p.tags) seen.add(t)
-  }
-  return [...seen]
-}
 
 export function getPrototype(id: string): PrototypeMeta | undefined {
   return prototypes.find((p) => p.id === id)

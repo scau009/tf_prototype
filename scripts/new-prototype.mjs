@@ -94,7 +94,6 @@ const entry = [
   `    name: '${title}',`,
   `    description: 'TODO：一句话描述这个原型',`,
   `    port: ${port},`,
-  `    tags: ['新原型'],`,
   `    status: 'draft',`,
   `    updated: '${today}',`,
   '  },',
@@ -108,4 +107,4 @@ console.log('')
 console.log('下一步：')
 console.log(`  1. 启动：pnpm dev --filter @tf/${name}`)
 console.log(`  2. 访问：http://localhost:${port}`)
-console.log('  3. 完善 packages/prototype-meta 中的描述与标签，Hub 卡片会同步展示')
+console.log('  3. 完善 packages/prototype-meta 中的描述，Hub 卡片会同步展示')

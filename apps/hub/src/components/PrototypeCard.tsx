@@ -35,12 +35,6 @@ export function PrototypeCard({ meta }: { meta: PrototypeMeta }) {
       <h2 className="proto-card__title">{meta.name}</h2>
       <p className="proto-card__desc">{meta.description}</p>
 
-      <div className="proto-card__tags">
-        {meta.tags.map((t) => (
-          <Tag key={t}>{t}</Tag>
-        ))}
-      </div>
-
       <div className="proto-card__footer">
         <code>{devCommand}</code>
         <Button size="sm" variant="ghost" onClick={copyCommand}>

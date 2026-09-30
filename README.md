@@ -14,7 +14,7 @@ push `prod` 分支自动构建部署到 Cloudflare。
 
 - **原型即目录**：`apps/` 下每个子目录是独立可运行的 React 应用，互不依赖、互不阻塞
 - **一键新原型**：`pnpm new <name>` 自动生成脚手架、分配端口、注册到门户
-- **导航门户**：Hub 汇总全部原型，支持搜索 / 标签 / 状态筛选，卡片含启动命令与直达链接
+- **导航门户**：Hub 以项目卡片为单位汇总全部原型，卡片含状态、启动命令与直达链接
 - **共享层沉淀**：`@tf/ui` 组件库 + `@tf/utils` 工具库 + `@tf/prototype-meta` 注册表，避免复制粘贴
 - **一条发布链**：`pnpm build:site` 合并整站（门户→根，原型→子路径）→ `wrangler deploy` 上线
 - **CI/CD**：PR / main 走质量检查，prod 合并自动部署，typecheck 作为发布闸门
@@ -28,7 +28,7 @@ tf_prototype/
 │   ├── todo-list/                     #   示例原型：待办清单（dev 端口 5101）
 │   └── dashboard/                     #   示例原型：数据看板（dev 端口 5102）
 ├── packages/                          # 【共享包】跨原型复用，只被 apps 依赖
-│   ├── prototype-meta/                #   原型注册表（唯一数据源）：id / 端口 / 标签 / 状态
+│   ├── prototype-meta/                #   原型注册表（唯一数据源）：id / 端口 / 状态
 │   ├── ui/                            #   共享组件：Button / Card / Tag / Input / Empty + 设计令牌
 │   └── utils/                         #   工具与 Hooks：cn / uid / formatDate / useLocalStorage
 ├── scripts/
@@ -98,7 +98,7 @@ pnpm new order-flow 订单流程演示
 pnpm dev --filter @tf/order-flow   # 启动并访问 http://localhost:<分配的端口>
 ```
 
-在 `src/App.tsx` 搭建交互；成型后更新注册表的 `description` / `tags` / `status`
+在 `src/App.tsx` 搭建交互；成型后更新注册表的 `description` / `status`
 （`draft → wip → demo → done`），门户卡片即时同步。
 
 ### 发布上线
