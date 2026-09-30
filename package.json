@@ -1,0 +1,23 @@
+{
+  "name": "tf-prototype",
+  "version": "0.0.0",
+  "private": true,
+  "description": "多项目 Web 原型仓库：pnpm monorepo + Vite + React + TS，门户统一导航",
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter './apps/*' run dev",
+    "dev:hub": "pnpm --filter @tf/hub run dev",
+    "build": "pnpm -r --filter './apps/*' run build",
+    "typecheck": "pnpm -r run typecheck",
+    "new": "node scripts/new-prototype.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "preview:site": "wrangler dev",
+    "deploy:cf": "pnpm build:site && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.143.0"
+  }
+}

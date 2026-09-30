@@ -1,0 +1,169 @@
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+  display: grid;
+  gap: 20px;
+}
+
+/* ---------- header ---------- */
+
+.dash__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.dash__header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+.dash__header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--tf-text-2);
+}
+.dash__ranges {
+  display: flex;
+  background: #e9edf4;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+.dash__range {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--tf-text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dash__range--active {
+  background: var(--tf-surface);
+  color: var(--tf-text);
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(23, 34, 59, 0.12);
+}
+
+/* ---------- stat cards ---------- */
+
+.dash__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.stat {
+  background: var(--tf-surface);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius);
+  box-shadow: var(--tf-shadow);
+  padding: 16px;
+}
+.stat__label {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--tf-text-2);
+}
+.stat__value {
+  margin: 6px 0 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.stat__delta {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.stat__delta span {
+  font-weight: 400;
+  color: var(--tf-text-2);
+}
+.stat__delta--up {
+  color: var(--tf-success);
+}
+.stat__delta--down {
+  color: var(--tf-danger);
+}
+
+/* ---------- rows ---------- */
+
+.dash__row {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+}
+@media (max-width: 720px) {
+  .dash__row {
+    grid-template-columns: 1fr;
+  }
+}
+.dash__notes {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--tf-text-2);
+}
+
+/* ---------- line chart ---------- */
+
+.line-chart svg {
+  display: block;
+  width: 100%;
+  height: 210px;
+}
+.line-chart__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--tf-text-2);
+}
+
+/* ---------- bar chart ---------- */
+
+.bar-chart {
+  display: flex;
+  gap: 10px;
+  height: 210px;
+  padding-top: 6px;
+}
+.bar-chart__item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.bar-chart__value {
+  font-size: 11px;
+  color: var(--tf-text-2);
+}
+.bar-chart__track {
+  width: 70%;
+  max-width: 34px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  background: #f0f3f8;
+  border-radius: 6px 6px 2px 2px;
+  overflow: hidden;
+}
+.bar-chart__bar {
+  width: 100%;
+  background: linear-gradient(180deg, #3b6ef6, #7a4dd6);
+  border-radius: 6px 6px 2px 2px;
+  transition: height 0.3s ease;
+}
+.bar-chart__label {
+  font-size: 11.5px;
+  color: var(--tf-text-2);
+  white-space: nowrap;
+}

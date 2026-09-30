@@ -1,0 +1,225 @@
+/**
+ * @tf/ui 设计令牌与基础组件样式
+ * 应用入口 import '@tf/ui/styles.css' 引入一次即可。
+ * 原型可在自己的 styles.css 中覆盖 --tf-* 变量实现换肤。
+ */
+
+:root {
+  --tf-bg: #f4f6f9;
+  --tf-surface: #ffffff;
+  --tf-text: #17223b;
+  --tf-text-2: #5a677f;
+  --tf-border: #e2e8f2;
+  --tf-primary: #3b6ef6;
+  --tf-primary-strong: #2f5bd9;
+  --tf-success: #17a06a;
+  --tf-warning: #e8960f;
+  --tf-danger: #e14b4b;
+  --tf-radius: 10px;
+  --tf-shadow: 0 1px 2px rgba(23, 34, 59, 0.06), 0 4px 12px rgba(23, 34, 59, 0.06);
+  --tf-font: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--tf-font);
+  background: var(--tf-bg);
+  color: var(--tf-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  background: #eef1f6;
+  color: #33415e;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+/* ---------- Button ---------- */
+
+.tf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tf-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.tf-btn--md {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+.tf-btn--sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12.5px;
+}
+.tf-btn--primary {
+  background: var(--tf-primary);
+  color: #fff;
+}
+.tf-btn--primary:hover:not(:disabled) {
+  background: var(--tf-primary-strong);
+}
+.tf-btn--default {
+  background: var(--tf-surface);
+  border-color: var(--tf-border);
+  color: var(--tf-text);
+}
+.tf-btn--default:hover:not(:disabled) {
+  border-color: var(--tf-primary);
+  color: var(--tf-primary);
+}
+.tf-btn--danger {
+  background: transparent;
+  color: var(--tf-danger);
+}
+.tf-btn--danger:hover:not(:disabled) {
+  background: #fdeaea;
+}
+.tf-btn--ghost {
+  background: transparent;
+  color: var(--tf-text-2);
+}
+.tf-btn--ghost:hover:not(:disabled) {
+  background: rgba(23, 34, 59, 0.06);
+  color: var(--tf-text);
+}
+
+/* ---------- Card ---------- */
+
+.tf-card {
+  background: var(--tf-surface);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius);
+  box-shadow: var(--tf-shadow);
+}
+.tf-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--tf-border);
+}
+.tf-card__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.tf-card__subtitle {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--tf-text-2);
+}
+.tf-card__extra {
+  flex-shrink: 0;
+}
+.tf-card__body {
+  padding: 16px;
+}
+
+/* ---------- Tag ---------- */
+
+.tf-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 20px;
+  background: #eef1f6;
+  color: var(--tf-text-2);
+  white-space: nowrap;
+}
+.tf-tag--gray {
+  background: #eef1f6;
+  color: #5a677f;
+}
+.tf-tag--blue {
+  background: #e8effe;
+  color: #2f5bd9;
+}
+.tf-tag--green {
+  background: #e2f6ec;
+  color: #12855a;
+}
+.tf-tag--orange {
+  background: #fdf1dc;
+  color: #b26a05;
+}
+.tf-tag--red {
+  background: #fdeaea;
+  color: #c23a3a;
+}
+.tf-tag--purple {
+  background: #f0e9fd;
+  color: #7a4dd6;
+}
+
+/* ---------- Input ---------- */
+
+.tf-input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--tf-border);
+  border-radius: 8px;
+  background: var(--tf-surface);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--tf-text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.tf-input:focus {
+  border-color: var(--tf-primary);
+  box-shadow: 0 0 0 3px rgba(59, 110, 246, 0.15);
+}
+.tf-input::placeholder {
+  color: #9aa6ba;
+}
+
+/* ---------- Empty ---------- */
+
+.tf-empty {
+  padding: 36px 16px;
+  text-align: center;
+}
+.tf-empty__icon {
+  font-size: 26px;
+  color: #b8c2d2;
+  margin-bottom: 6px;
+}
+.tf-empty__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tf-text);
+}
+.tf-empty__description {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--tf-text-2);
+}

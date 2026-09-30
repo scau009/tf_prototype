@@ -1,0 +1,11 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.starter__hint {
+  margin: 0;
+  line-height: 1.9;
+  font-size: 14px;
+}

@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# 允许 esbuild（Vite）与 workerd（wrangler）执行安装脚本
+allowBuilds:
+  esbuild: true
+  workerd: true

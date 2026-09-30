@@ -1,0 +1,33 @@
+name: CI
+
+# PR 与 main 分支推送时做质量检查（不部署）
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    name: 类型检查与构建
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4 # 版本读取 package.json 的 packageManager 字段
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 类型检查
+        run: pnpm typecheck
+
+      - name: 构建全部应用
+        run: pnpm build

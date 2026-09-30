@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tf-prototype",
+  "compatibility_date": "2026-09-30",
+  "assets": {
+    // 单项目子路径形态：门户在根，各原型在 /<id>/
+    // 由 scripts/build-site.mjs 构建合并，先运行 pnpm build:site
+    "directory": "./site"
+  }
+}
