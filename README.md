@@ -1,39 +1,63 @@
 # TF Prototype · 多项目 Web 原型仓库
 
-基于 **Vite + React + TypeScript + pnpm Monorepo**。一个仓库承载多个可交互原型，
-由 Hub 门户统一导航，跨原型共享组件与工具，新增原型只需一条命令 `pnpm new <name>`。
+[![CI](https://github.com/scau009/tf_prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/scau009/tf_prototype/actions/workflows/ci.yml)
+[![Deploy](https://github.com/scau009/tf_prototype/actions/workflows/deploy.yml/badge.svg)](https://github.com/scau009/tf_prototype/actions/workflows/deploy.yml)
+
+基于 **Vite + React + TypeScript + pnpm Monorepo** 的原型工厂：一个仓库承载多个可交互原型，
+Hub 门户统一导航，共享组件与工具跨原型复用，`pnpm new` 一条命令拉起新原型，
+push `prod` 分支自动构建部署到 Cloudflare。
+
+**线上地址：<https://tf-prototype.bearinspring1996.workers.dev>**
+（门户在根路径，各原型在 `/<id>/` 子路径，如 [/todo-list/](https://tf-prototype.bearinspring1996.workers.dev/todo-list/)）
+
+## 核心特性
+
+- **原型即目录**：`apps/` 下每个子目录是独立可运行的 React 应用，互不依赖、互不阻塞
+- **一键新原型**：`pnpm new <name>` 自动生成脚手架、分配端口、注册到门户
+- **导航门户**：Hub 汇总全部原型，支持搜索 / 标签 / 状态筛选，卡片含启动命令与直达链接
+- **共享层沉淀**：`@tf/ui` 组件库 + `@tf/utils` 工具库 + `@tf/prototype-meta` 注册表，避免复制粘贴
+- **一条发布链**：`pnpm build:site` 合并整站（门户→根，原型→子路径）→ `wrangler deploy` 上线
+- **CI/CD**：PR / main 走质量检查，prod 合并自动部署，typecheck 作为发布闸门
 
 ## 目录结构
 
 ```text
 tf_prototype/
 ├── apps/                              # 【原型应用】每个子目录 = 一个独立可运行的原型
-│   ├── hub/                           #   原型导航门户（端口 5173）：搜索 / 标签 / 状态筛选
-│   ├── todo-list/                     #   示例原型：待办清单（端口 5101）
-│   │   ├── index.html                 #   应用入口 HTML
-│   │   ├── vite.config.ts             #   Vite 配置（端口在各自文件里分配）
-│   │   ├── tsconfig.json              #   继承根 tsconfig.base.json
-│   │   ├── package.json               #   包名 @tf/todo-list
-│   │   └── src/
-│   │       ├── main.tsx               #   应用引导（引入 @tf/ui 样式 + 私有样式）
-│   │       ├── App.tsx                #   页面入口
-│   │       └── styles.css             #   页面私有样式
-│   └── dashboard/                     #   示例原型：数据看板（端口 5102）
-│       └── …                          #   （结构同上，另含 components/ 与 data.ts）
+│   ├── hub/                           #   原型导航门户（dev 端口 5173）
+│   ├── todo-list/                     #   示例原型：待办清单（dev 端口 5101）
+│   └── dashboard/                     #   示例原型：数据看板（dev 端口 5102）
 ├── packages/                          # 【共享包】跨原型复用，只被 apps 依赖
-│   ├── prototype-meta/                #   原型注册表（唯一数据源）：名称 / 端口 / 标签 / 状态
-│   ├── ui/                            #   共享组件库：Button / Card / Tag / Input / Empty
-│   │   └── src/styles.css             #   设计令牌（--tf-*）+ 基础组件样式
+│   ├── prototype-meta/                #   原型注册表（唯一数据源）：id / 端口 / 标签 / 状态
+│   ├── ui/                            #   共享组件：Button / Card / Tag / Input / Empty + 设计令牌
 │   └── utils/                         #   工具与 Hooks：cn / uid / formatDate / useLocalStorage
 ├── scripts/
-│   ├── new-prototype.mjs              # 脚手架：生成新原型 + 分配端口 + 自动注册
-│   └── template-app/                  # 新原型的文件模板（{{id}} / {{port}} 占位）
+│   ├── new-prototype.mjs              # pnpm new：生成新原型 + 分配端口 + 自动注册门户
+│   ├── build-site.mjs                 # pnpm build:site：整站构建合并（hub→根，原型→/<id>/）
+│   └── template-app/                  # 新原型文件模板（{{id}} / {{port}} 占位）
+├── .github/workflows/
+│   ├── ci.yml                         # CI：PR / push main → typecheck + build
+│   └── deploy.yml                     # CD：push prod → 构建整站 → 部署 Cloudflare Workers
 ├── docs/
-│   └── conventions.md                 # 开发规范：命名、端口、状态流转、依赖分层
+│   └── conventions.md                 # 开发规范：命名 / 端口 / 状态流转 / 依赖分层
+├── wrangler.jsonc                     # Cloudflare Workers 静态资源配置（配置即代码）
 ├── pnpm-workspace.yaml                # workspace 定义：apps/* 与 packages/*
 ├── tsconfig.base.json                 # 全仓 TS 基础配置（各包 extends，改一处生效全局）
-├── package.json                       # 根脚本：dev / build / typecheck / new
-└── README.md
+└── package.json                       # 根脚本：dev / build / typecheck / new / deploy:cf
+```
+
+单个原型（以 `apps/todo-list` 为例）的内部结构：
+
+```text
+apps/todo-list/
+├── index.html                 # 应用入口 HTML
+├── vite.config.ts             # Vite 配置（dev 端口写死在此，避免并行漂移）
+├── tsconfig.json              # 继承根 tsconfig.base.json
+├── package.json               # 包名 @tf/todo-list
+└── src/
+    ├── main.tsx               # 应用引导（引入 @tf/ui 样式 + 私有样式）
+    ├── App.tsx                # 页面入口
+    └── styles.css             # 页面私有样式
 ```
 
 ### 依赖分层规则
@@ -47,109 +71,106 @@ apps/* ──► packages/ui ──► packages/utils
      prototype-meta 是纯数据包，不依赖任何包。
 ```
 
-## 快速开始
+## 快速开始（本地）
 
 ```bash
-pnpm install      # 安装全部依赖（workspace 联动）
-pnpm dev          # 并行启动 Hub 门户 + 全部原型
-pnpm dev:hub      # 只启动门户
+git clone git@github.com:scau009/tf_prototype.git
+cd tf_prototype
+pnpm install        # 安装全部依赖（workspace 联动）
+pnpm dev            # 并行启动 Hub 门户 + 全部原型
 ```
 
-启动后访问 **http://localhost:5173**（Hub 门户），
-点击卡片上的「打开原型 ↗」跳转到各原型（5101、5102 …）。
+访问 **http://localhost:5173**（门户），点卡片「打开原型 ↗」直达各原型（5101、5102 …）。
+只启动单个原型：`pnpm dev --filter @tf/todo-list`。
 
-## 常用命令
+## 日常工作流
 
-| 命令 | 说明 |
-| --- | --- |
-| `pnpm dev` | 并行启动门户与全部原型 |
-| `pnpm dev --filter @tf/todo-list` | 只启动某个原型（按包名过滤） |
-| `pnpm build` | 构建全部原型（产物在各自 `dist/`） |
-| `pnpm build:site` | 构建并合并整站产物到 `site/`（部署用） |
-| `pnpm preview:site` | wrangler dev 本地模拟线上站点（8787） |
-| `pnpm deploy:cf` | 构建整站并发布到 Cloudflare Workers |
-| `pnpm typecheck` | 全仓 TypeScript 类型检查 |
-| `pnpm new <name> [标题]` | 创建新原型并自动注册到门户 |
-
-## 部署到 Cloudflare（Workers 静态资源）
-
-单项目子路径形态：门户在根路径，各原型在 `/<id>/`，一次部署整站上线。
-
-```bash
-pnpm build:site    # 构建并合并产物到 site/（hub → 根，原型 → /<id>/）
-pnpm preview:site  # 本地模拟线上（http://localhost:8787，无需认证）
-pnpm deploy:cf     # = build:site + wrangler deploy
-```
-
-首次部署前设置认证环境变量（令牌需 **Workers Scripts:Edit** 权限，在
-Dashboard → My Profile → API Tokens 创建；Account ID 见 Dashboard 概览页）：
-
-```bash
-export CLOUDFLARE_API_TOKEN=xxx        # 或写入 shell profile
-export CLOUDFLARE_ACCOUNT_ID=xxx
-```
-
-> 脚本名用 `deploy:cf` 而非 `deploy`，避开 pnpm 内置的 `deploy` 命令（那是 workspace 单包发布用的）。
-
-- 站点结构声明在根目录 `wrangler.jsonc`（配置即代码，进 git）
-- 部署地址：`tf-prototype.<账号子域>.workers.dev`；自定义域名在 `wrangler.jsonc` 加 `routes`
-- Hub 卡片链接自动按环境切换：本地 dev 指向 `localhost:<端口>`，线上指向 `/<id>/`
-
-## 新增一个原型（推荐流程）
+### 新增一个原型
 
 ```bash
 pnpm new order-flow 订单流程演示
 ```
 
-脚本会自动：
-
-1. 从 `scripts/template-app/` 生成 `apps/order-flow/`；
-2. 分配下一个空闲端口（5101–5199）；
-3. 在 `packages/prototype-meta/src/index.ts` 注册一条 `draft` 记录。
-
-然后：
+脚本自动完成：从 `scripts/template-app/` 生成 `apps/order-flow/`、分配下一个空闲端口
+（5101–5199）、在原型注册表写入一条 `draft` 记录。随后：
 
 ```bash
-pnpm dev --filter @tf/order-flow   # 启动并打开 http://localhost:<分配的端口>
+pnpm dev --filter @tf/order-flow   # 启动并访问 http://localhost:<分配的端口>
 ```
 
-在 `src/App.tsx` 里搭建交互；原型成型后，更新注册表中的 `description` / `tags` /
-`status`（`draft → wip → demo → done`），Hub 门户卡片即时同步。
+在 `src/App.tsx` 搭建交互；成型后更新注册表的 `description` / `tags` / `status`
+（`draft → wip → demo → done`），门户卡片即时同步。
 
-## 约定速览（详见 docs/conventions.md）
-
-- **命名**：原型目录与 id 用 kebab-case（如 `order-flow`），包名 `@tf/<id>`，两者保持一致。
-- **端口**：Hub 固定 5173；原型使用 5101–5199，由 `pnpm new` 顺序分配，写死在各自 `vite.config.ts`。
-- **样式**：设计令牌统一在 `@tf/ui/styles.css`（`--tf-*` 变量），页面私有样式放各自 `src/styles.css`，原型内可覆盖令牌换肤。
-- **沉没规则**：组件被第 2 个原型用到时，才从原型提升到 `packages/ui`；数据 mock 留在各原型内，不引入真实后端。
-- **状态流转**：`draft`（刚创建）→ `wip`（搭建中）→ `demo`（可对外演示）→ `done`（原型结论已沉淀）。
-
-## CI / CD（GitHub Actions）
-
-分支模型：**`main` 开发分支**（PR 合入，CI 检查）；**`prod` 生产分支**（合并 main 后自动部署上线）。
-
-| 工作流 | 触发 | 动作 |
-| --- | --- | --- |
-| CI（`.github/workflows/ci.yml`） | PR、push `main` | install → typecheck → build（全部应用） |
-| Deploy（`.github/workflows/deploy.yml`） | push `prod`、手动触发 | install → typecheck → build:site → `wrangler deploy` |
-
-发布上线：
+### 发布上线
 
 ```bash
 git checkout main && git pull
-git checkout prod && git merge main && git push   # 推送后自动部署
+git checkout prod && git merge main && git push   # 推送后 GitHub Actions 自动部署
 ```
 
-首次使用需在 GitHub 仓库 **Settings → Secrets and variables → Actions** 添加两个 Secret：
+约 1–2 分钟后线上更新（Deploy 徽章 / Actions 页可看进度），新原型自动出现在线上门户。
+紧急绕过 CI 时可本地直发：`pnpm deploy:cf`（需本地 export Cloudflare 凭据）。
 
-- `CLOUDFLARE_API_TOKEN` —— 建议单独创建一个仅含 Workers Scripts:Edit 权限的令牌
-- `CLOUDFLARE_ACCOUNT_ID` —— 账号 ID（Dashboard 概览页）
+## 命令速查
 
-> 部署并发控制：新的 prod 推送会自动取消进行中的旧部署（`concurrency` 配置），
-> 部署前的 typecheck 作为闸门，类型错误会阻断发布。
+| 命令 | 说明 |
+| --- | --- |
+| `pnpm dev` | 并行启动门户与全部原型（hub 5173，原型 5101+） |
+| `pnpm dev --filter @tf/<id>` | 只启动某个原型 |
+| `pnpm new <name> [标题]` | 创建新原型：脚手架 + 分配端口 + 注册门户 |
+| `pnpm typecheck` | 全仓 TypeScript 类型检查 |
+| `pnpm build` | 构建全部应用（产物在各自 `dist/`） |
+| `pnpm build:site` | 构建并合并整站产物到 `site/`（hub→根，原型→`/<id>/`） |
+| `pnpm preview:site` | `wrangler dev` 本地模拟线上站点（http://localhost:8787，无需认证） |
+| `pnpm deploy:cf` | 本地直发：build:site + wrangler deploy（CI 之外的手动通道） |
+
+> 脚本名用 `deploy:cf` 而非 `deploy`，避开 pnpm 内置的 `deploy` 命令（workspace 单包发布用）。
+
+## 部署架构（Cloudflare Workers 静态资源）
+
+**单项目子路径**形态：门户在根路径、各原型在 `/<id>/`，一次部署整站上线。
+
+```text
+pnpm build:site                          wrangler deploy
+┌─────────────────────┐    ┌─────────────────────────────────┐
+│ hub      → 根路径    │    │ https://tf-prototype.xxx.        │
+│ 原型 A   → /a/      ├───►│         workers.dev/             │
+│ 原型 B   → /b/      │    │   /todo-list/  /dashboard/ …     │
+└─────────────────────┘    └─────────────────────────────────┘
+        site/                       Cloudflare Workers
+```
+
+- 站点结构声明在 `wrangler.jsonc`（配置即代码，进 git）；自定义域名在其中加 `routes`
+- Hub 卡片链接按环境自动切换：本地 dev → `localhost:<端口>`，线上 → `/<id>/`
+- 每次部署生成可回滚的版本；无尾斜杠路径 307 自动补全（如 `/todo-list` → `/todo-list/`）
+
+## CI / CD（GitHub Actions）
+
+分支模型：**`main` 开发分支**（PR 合入，CI 检查）；**`prod` 生产分支**（合并后自动部署）。
+原型开发分支命名 `proto/<id>`（如 `proto/order-flow`）。
+
+| 工作流 | 触发 | 动作 |
+| --- | --- | --- |
+| [CI](.github/workflows/ci.yml) | PR、push `main` | install → typecheck → build（全部应用） |
+| [Deploy](.github/workflows/deploy.yml) | push `prod`、手动触发 | install → typecheck → build:site → `wrangler deploy` |
+
+- 凭据走 GitHub Secrets：`CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`（**已配置**）
+- `concurrency` 控制：新的 prod 推送自动取消进行中的旧部署
+- typecheck 是发布闸门，类型错误阻断上线
+- pnpm 版本由 `package.json` 的 `packageManager` 字段锁定，CI 与本地一致
+
+## 约定速览（详见 [docs/conventions.md](docs/conventions.md)）
+
+- **命名**：原型目录与 id 用 kebab-case（如 `order-flow`），包名 `@tf/<id>`，两者一致
+- **端口**：Hub 固定 5173；原型 5101–5199，由 `pnpm new` 顺序分配
+- **样式**：设计令牌统一在 `@tf/ui/styles.css`（`--tf-*` 变量），页面私有样式各自维护
+- **沉没规则**：组件被第 2 个原型用到时才提升到 `@tf/ui`；mock 数据留在原型内
+- **状态流转**：`draft`（刚创建）→ `wip`（搭建中）→ `demo`（可演示）→ `done`（结论已沉淀）
+- **凭据**：Cloudflare 令牌只存在于环境变量 / GitHub Secrets，禁止写入代码与配置
 
 ## 技术栈版本
 
-- Node ≥ 20 · pnpm 12（workspace 协议）
+- Node ≥ 20 · pnpm 12（workspace 协议，版本由 `packageManager` 锁定）
 - React 19 · TypeScript 5.9 · Vite 7（@vitejs/plugin-react）
+- wrangler 4（Workers 静态资源托管）
 - 无 UI 框架、无图表库 —— 共享组件与图表均为手写轻实现，保证原型轻量可控
