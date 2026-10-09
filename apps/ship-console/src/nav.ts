@@ -1,8 +1,8 @@
 import type { LucideIcon } from 'lucide-react'
-import { BellRingIcon, CalendarRangeIcon, RadarIcon, ReceiptTextIcon } from 'lucide-react'
+import { BellRingIcon, CalendarRangeIcon, RadarIcon } from 'lucide-react'
 
 /** 中台全部路由路径（字面量联合，供 Link 的 to 做类型检查） */
-export type RoutePath = '/schedule' | '/visualization' | '/invoices' | '/monitoring'
+export type RoutePath = '/schedule' | '/visualization' | '/monitoring'
 
 /**
  * 中台导航配置（唯一数据源）：
@@ -34,12 +34,6 @@ export const MODULE_NAV: NavItem[] = [
     desc: '以一票货为中心，追踪 订舱 → 空箱返还 共 11 个节点的完整生命周期',
     icon: RadarIcon,
     detail: '跟踪详情',
-  },
-  {
-    path: '/invoices',
-    label: '发票管理',
-    desc: '发票台账：按提单号关联一票货，支持筛选、预览与下载发票原件',
-    icon: ReceiptTextIcon,
   },
   {
     path: '/monitoring',

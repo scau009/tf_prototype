@@ -1,16 +1,10 @@
 import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router'
-import {
-  isValidScheduleDate,
-  validateInvoiceSearch,
-  validateMonitoringSearch,
-  validateTrackingSearch,
-} from './data'
+import { isValidScheduleDate, validateMonitoringSearch, validateTrackingSearch } from './data'
 import { RootLayout } from './routes/__root'
 import { AppShell } from './routes/_layout'
 import { SchedulePage } from './routes/schedule'
 import { VisualizationPage } from './routes/visualization'
 import { TrackingDetailPage } from './routes/tracking-detail'
-import { InvoicesPage } from './routes/invoices'
 import { MonitoringPage } from './routes/monitoring'
 import { DEFAULT_NAV } from './nav'
 
@@ -56,13 +50,6 @@ const trackingDetailRoute = createRoute({
   path: '/visualization/$shipmentId',
   component: TrackingDetailPage,
 })
-const invoicesRoute = createRoute({
-  getParentRoute: () => shellRoute,
-  path: '/invoices',
-  /** 列表筛选条件落在 search params：?q=&status=&category=&currency= */
-  validateSearch: validateInvoiceSearch,
-  component: InvoicesPage,
-})
 const monitoringRoute = createRoute({
   getParentRoute: () => shellRoute,
   path: '/monitoring',
@@ -77,7 +64,6 @@ const routeTree = rootRoute.addChildren([
     scheduleRoute,
     visualizationRoute,
     trackingDetailRoute,
-    invoicesRoute,
     monitoringRoute,
   ]),
 ])

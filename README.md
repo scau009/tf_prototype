@@ -28,7 +28,7 @@ tf_prototype/
 │   ├── hub/                           #   原型导航门户（dev 端口 5173）
 │   ├── todo-list/                     #   示例原型：待办清单（dev 端口 5101）
 │   ├── dashboard/                     #   示例原型：数据看板（dev 端口 5102）
-│   └── ship-console/                  #   船务信息中台（dev 端口 5103，左栏中台外壳 + 四模块）
+│   └── ship-console/                  #   船务信息中台（dev 端口 5103，左栏中台外壳 + 三模块）
 ├── packages/                          # 【共享包】跨原型复用，只被 apps 依赖
 │   ├── prototype-meta/                #   原型注册表（唯一数据源）：id / 端口 / 状态
 │   ├── ui/                            #   共享组件：shadcn/ui（Radix + Tailwind v4）+ 设计令牌
