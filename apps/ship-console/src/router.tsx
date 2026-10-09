@@ -3,7 +3,6 @@ import {
   isValidScheduleDate,
   validateInvoiceSearch,
   validateMonitoringSearch,
-  validateTariffSearch,
   validateTrackingSearch,
 } from './data'
 import { RootLayout } from './routes/__root'
@@ -12,7 +11,6 @@ import { SchedulePage } from './routes/schedule'
 import { VisualizationPage } from './routes/visualization'
 import { TrackingDetailPage } from './routes/tracking-detail'
 import { InvoicesPage } from './routes/invoices'
-import { TariffBookPage } from './routes/tariff-book'
 import { MonitoringPage } from './routes/monitoring'
 import { DEFAULT_NAV } from './nav'
 
@@ -65,13 +63,6 @@ const invoicesRoute = createRoute({
   validateSearch: validateInvoiceSearch,
   component: InvoicesPage,
 })
-const tariffBookRoute = createRoute({
-  getParentRoute: () => shellRoute,
-  path: '/tariff-book',
-  /** 列表筛选条件落在 search params：?q=&port=&category=&currency= */
-  validateSearch: validateTariffSearch,
-  component: TariffBookPage,
-})
 const monitoringRoute = createRoute({
   getParentRoute: () => shellRoute,
   path: '/monitoring',
@@ -87,7 +78,6 @@ const routeTree = rootRoute.addChildren([
     visualizationRoute,
     trackingDetailRoute,
     invoicesRoute,
-    tariffBookRoute,
     monitoringRoute,
   ]),
 ])

@@ -27,7 +27,7 @@ export const prototypes: PrototypeMeta[] = [
   {
     id: 'ship-console',
     name: '船务信息中台',
-    description: '特福国际内部中台：点对点船期运价查询、在途追踪（一票货全生命周期）、发票管理（按提单号关联）、港口收费标准（Tariff Book）、监控节点配置（单票提单生命周期预警）。',
+    description: '特福国际内部中台：点对点船期运价查询、在途追踪（一票货全生命周期）、发票管理（按提单号关联）、监控节点配置（单票提单生命周期预警）。',
     port: 5103,
     status: 'wip',
     updated: '2026-09-30',

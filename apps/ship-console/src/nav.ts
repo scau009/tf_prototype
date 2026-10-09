@@ -1,19 +1,8 @@
 import type { LucideIcon } from 'lucide-react'
-import {
-  BellRingIcon,
-  BookTextIcon,
-  CalendarRangeIcon,
-  RadarIcon,
-  ReceiptTextIcon,
-} from 'lucide-react'
+import { BellRingIcon, CalendarRangeIcon, RadarIcon, ReceiptTextIcon } from 'lucide-react'
 
 /** 中台全部路由路径（字面量联合，供 Link 的 to 做类型检查） */
-export type RoutePath =
-  | '/schedule'
-  | '/visualization'
-  | '/invoices'
-  | '/tariff-book'
-  | '/monitoring'
+export type RoutePath = '/schedule' | '/visualization' | '/invoices' | '/monitoring'
 
 /**
  * 中台导航配置（唯一数据源）：
@@ -51,12 +40,6 @@ export const MODULE_NAV: NavItem[] = [
     label: '发票管理',
     desc: '发票台账：按提单号关联一票货，支持筛选、预览与下载发票原件',
     icon: ReceiptTextIcon,
-  },
-  {
-    path: '/tariff-book',
-    label: '港口收费标准',
-    desc: 'Port Tariff Book：各港口费用类别的收费标准查询与维护',
-    icon: BookTextIcon,
   },
   {
     path: '/monitoring',
