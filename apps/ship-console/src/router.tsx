@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router'
 import { isValidScheduleDate, validateMonitoringSearch, validateTrackingSearch } from './data'
 import { RootLayout } from './routes/__root'
@@ -8,7 +9,22 @@ import { TrackingDetailPage } from './routes/tracking-detail'
 import { MonitoringPage } from './routes/monitoring'
 import { DEFAULT_NAV } from './nav'
 
-const rootRoute = createRootRoute({ component: RootLayout })
+/**
+ * 未匹配路由的 notFound 兜底：历史链接（如已移除模块的 /invoices、/tariff-book）
+ * 不再落到 TanStack 默认 404 文案，而是 replace 跳转到默认落地模块（/schedule），
+ * replace 保证坏链接不留在浏览器历史里。
+ */
+function NotFoundFallback() {
+  useEffect(() => {
+    void router.navigate({ to: DEFAULT_NAV.path, replace: true })
+  }, [])
+  return null
+}
+
+const rootRoute = createRootRoute({
+  component: RootLayout,
+  notFoundComponent: NotFoundFallback,
+})
 
 /** 无路径布局路由（id 路由）：中台外壳（侧边栏 + 顶栏），子模块渲染在 Outlet */
 const shellRoute = createRoute({
