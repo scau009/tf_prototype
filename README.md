@@ -149,7 +149,8 @@ pnpm build:site                          wrangler deploy
 
 - 站点结构声明在 `wrangler.jsonc`（配置即代码，进 git）；自定义域名写在其 `routes` 里（`custom_domain: true`），
   DNS 记录由 `wrangler deploy` 自动建好——前提是该域名已加到 Worker 所在 Cloudflare 账号且 zone 状态 Active，
-  且 `CLOUDFLARE_API_TOKEN` 对这个 zone 有编辑权限，否则部署会在挂域名这一步报错（旧版本继续在线）
+  且 `CLOUDFLARE_API_TOKEN` 对这个 zone 有编辑权限，否则部署会在挂域名这一步报错（旧版本继续在线）；
+  `workers_dev = true` 保留 workers.dev 旧入口（配了 `routes` 后 wrangler 默认会关掉它）
 - Hub 卡片链接按环境自动切换：本地 dev → `localhost:<端口>`，线上 → `/<id>/`
 - 每次部署生成可回滚的版本；无尾斜杠路径 307 自动补全（如 `/todo-list` → `/todo-list/`）
 

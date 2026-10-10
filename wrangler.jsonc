@@ -9,8 +9,11 @@
   },
   "routes": [
     // *.workers.dev 在中国境内被整体封锁，绑定自有域名走 Cloudflare 自有节点后可直连
-    // wrangler deploy 自动在该 zone 建/维护这条 DNS 记录；workers.dev 旧地址不受影响
+    // wrangler deploy 自动在该 zone 建/维护这条 DNS 记录
     // 前提：域名已加到本 Worker 所在 Cloudflare 账号且状态为 Active，否则部署报错
     { "pattern": "tf-prototype.taoism.gz.cn", "custom_domain": true }
-  ]
+  ],
+  // 有 routes 时 wrangler 默认关掉 workers.dev 入口（部署会警告并停用旧地址），
+  // 这里显式打开，让 *.workers.dev 与自定义域名同时在线
+  "workers_dev": true
 }
