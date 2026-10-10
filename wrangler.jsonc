@@ -6,5 +6,11 @@
     // 单项目子路径形态：门户在根，各原型在 /<id>/
     // 由 scripts/build-site.mjs 构建合并，先运行 pnpm build:site
     "directory": "./site"
-  }
+  },
+  "routes": [
+    // *.workers.dev 在中国境内被整体封锁，绑定自有域名走 Cloudflare 自有节点后可直连
+    // wrangler deploy 自动在该 zone 建/维护这条 DNS 记录；workers.dev 旧地址不受影响
+    // 前提：域名已加到本 Worker 所在 Cloudflare 账号且状态为 Active，否则部署报错
+    { "pattern": "tf-prototype.taoism.gz.cn", "custom_domain": true }
+  ]
 }

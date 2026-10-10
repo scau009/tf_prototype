@@ -7,8 +7,10 @@
 Hub 门户统一导航，共享组件与工具跨原型复用，`pnpm new` 一条命令拉起新原型，
 push `prod` 分支自动构建部署到 Cloudflare。
 
-**线上地址：<https://tf-prototype.bearinspring1996.workers.dev>**
-（门户在根路径，各原型在 `/<id>/` 子路径，如 [/todo-list/](https://tf-prototype.bearinspring1996.workers.dev/todo-list/)）
+**线上地址：<https://tf-prototype.taoism.gz.cn>**
+（门户在根路径，各原型在 `/<id>/` 子路径，如 [/todo-list/](https://tf-prototype.taoism.gz.cn/todo-list/)）
+
+备用地址 <https://tf-prototype.bearinspring1996.workers.dev>（`*.workers.dev` 在中国境内被整体封锁，故改用自定义域名）
 
 ## 核心特性
 
@@ -138,14 +140,16 @@ git checkout prod && git merge main && git push   # 推送后 GitHub Actions 自
 ```text
 pnpm build:site                          wrangler deploy
 ┌─────────────────────┐    ┌─────────────────────────────────┐
-│ hub      → 根路径    │    │ https://tf-prototype.xxx.        │
-│ 原型 A   → /a/      ├───►│         workers.dev/             │
+│ hub      → 根路径    │    │ https://tf-prototype.            │
+│ 原型 A   → /a/      ├───►│    taoism.gz.cn/                 │
 │ 原型 B   → /b/      │    │   /todo-list/  /dashboard/ …     │
 └─────────────────────┘    └─────────────────────────────────┘
         site/                       Cloudflare Workers
 ```
 
-- 站点结构声明在 `wrangler.jsonc`（配置即代码，进 git）；自定义域名在其中加 `routes`
+- 站点结构声明在 `wrangler.jsonc`（配置即代码，进 git）；自定义域名写在其 `routes` 里（`custom_domain: true`），
+  DNS 记录由 `wrangler deploy` 自动建好——前提是该域名已加到 Worker 所在 Cloudflare 账号且 zone 状态 Active，
+  且 `CLOUDFLARE_API_TOKEN` 对这个 zone 有编辑权限，否则部署会在挂域名这一步报错（旧版本继续在线）
 - Hub 卡片链接按环境自动切换：本地 dev → `localhost:<端口>`，线上 → `/<id>/`
 - 每次部署生成可回滚的版本；无尾斜杠路径 307 自动补全（如 `/todo-list` → `/todo-list/`）
 
